@@ -1,12 +1,14 @@
 const mongoose=require('mongoose');
-var {connect,clientModel,userModel,taskModel}=require('./schema');
+var {connect,clientModel,userModel,taskModel,taskModel}=require('./schema');
 connect();
 clientModel=clientModel();userModel=userModel();taskModel=taskModel();
 
 var saveClient=(req,res)=>{
     var {name,email,phone,address,profession,image}=req.body;
+    //To be removed after making jwt auth
+    var user='5cdf185ef5cc7026484a3813';
     console.log({name,email,phone,address,profession,image});
-    var client=new clientModel({name,email,phone,address,profession,image})
+    var client=new clientModel({name,email,phone,address,profession,image,user})
     client.save().then(()=>{
         console.log('CLIENT information saved');
         res.status(200).json({message:"CLIENT information saved"});
@@ -32,16 +34,64 @@ var saveUser=(req,res)=>{
 }
 
 var getClients=(req,res)=>{
-    clientModel.find({},"_id name email").then((data)=>{
+    var user='5cdf185ef5cc7026484a3813';
+    clientModel.find({user},"_id name email profession").then((data)=>{
         res.status(200).json(data);
     })
 }
 
 var singleClient=(req,res)=>{
     var {id}=req.params;
-    clientModel.findOne({_id:id}).then(data=>{
-        res.status(200).json(data);
+    console.log(id);
+    var user='5cdf185ef5cc7026484a3813';
+    clientModel.findOne({_id:id,user}).then(data=>{
+        return data;
+    }).then((clientData)=>{
+        taskModel.find({user},'taskname description date_created description').then(data=>{
+            clientData={clientData,tasks:data};
+            res.status(200).json(clientData);
+        })
+    })
+    .catch(err=>{
+        res.status(400).send({message:'Server failure'});
     })
 }
 
-module.exports={saveClient,saveUser,getClients,singleClient};
+var saveTask=(req,res)=>{
+    //modify the user parameter later
+    var {taskname,description,duration}=req.body;
+    var user='5cdf185ef5cc7026484a3813';
+    var task=new taskModel({taskname,description,duration,user});
+    task.save().then(()=>{
+        console.log("TASK saved");
+        res.status(200).json({message:'TASK saved'});
+    }).catch(err=>{
+        console.log(err);
+        res.status(400).json({message:'TASK NOT saved'});
+    })
+}
+
+var listTasks=(req,res)=>{
+    var user='5cdf185ef5cc7026484a3813';
+    taskModel.find({user},"taskname description duration").then((tasks)=>{
+        res.status(200).json({tasks});
+    }).catch(err=>{
+        console.log(err);
+        res.status(400).json({message:'Server failure'});
+    })
+}
+
+var addClientToTask=(req,res)=>{
+    var {user_id,client_id,task_id}=req.body;
+    user_id='5cdf185ef5cc7026484a3813';
+    console.log({user_id,client_id,task_id});
+    taskModel.update({user:user_id,_id:task_id},{$push:{clients:client_id}}).then((data)=>{
+        console.log(data);
+        res.status(200).json({message:'Client Added to Task'});
+    }).catch(err=>{
+        console.log(err);
+        res.status(400).json({message:'Client NOT Added to Task. Server failure'});
+    })
+}
+
+module.exports={saveClient,saveUser,getClients,singleClient,saveTask,listTasks,addClientToTask};

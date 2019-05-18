@@ -68,7 +68,8 @@ var clientModel=()=>{
                 }},
         address:{type:String,trim:true,required:true},
         profession:{type:String},
-        image:{type:String}
+        image:{type:String},
+        user:{type:mongoose.Schema.Types.ObjectId}
     });
 
     return new mongoose.model('Clients',schema);
@@ -78,14 +79,14 @@ var taskModel=()=>{
     var schema=mongoose.Schema({
         taskname:{type:String,required:true},
         description:{type:String,required:true},
-        clients:[{
-            id:{type:mongoose.Schema.Types.ObjectId,required:true}
-        }],
-        _creator:{
-            type:mongoose.Schema.Types.ObjectId,required:true
-        }
-    })
+        clients:[{type:mongoose.Schema.Types.ObjectId,unique:true}],
+        date_created:{type:mongoose.Schema.Types.Date,default:Date.now().toString()},
+        duration:{type:String},
+        user:{type:mongoose.Schema.Types.ObjectId,required:true}
+    });
 
+    
+    
     return new mongoose.model('Tasks',schema);
 }
 
