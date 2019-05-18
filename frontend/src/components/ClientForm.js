@@ -15,13 +15,13 @@ export default class ClientForm extends Component {
             profession=document.getElementsByClassName('profession')[0].value,
             image="jcrkere";
         console.log({name,email,phone,address,profession})
-        axios.request({
-                method:"POST",
-                url:process.env.REACT_APP_BACKEND+'/clientForm',
-                data:JSON.stringify({name,email,phone,profession,image,address})
-            }).then((resp)=>{
-            alert(resp.message);    
+        axios.post(process.env.REACT_APP_BACKEND+'/clientForm',
+                {name,email,phone,profession,image,address}
+            ).then(({data})=>{
+            console.log(JSON.stringify(data,null,2));
+            alert(data.message);    
         },err=>{
+            console.log(err);
             alert(err.message)
         })
     }

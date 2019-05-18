@@ -1,8 +1,7 @@
 const mongoose=require('mongoose');
-var {connect,clientModel,userModel}=require('./schema');
+var {connect,clientModel,userModel,taskModel}=require('./schema');
 connect();
-clientModel=clientModel();
-userModel=userModel();
+clientModel=clientModel();userModel=userModel();taskModel=taskModel();
 
 var saveClient=(req,res)=>{
     var {name,email,phone,address,profession,image}=req.body;
@@ -39,8 +38,8 @@ var getClients=(req,res)=>{
 }
 
 var singleClient=(req,res)=>{
-    var {id}=req.params.id;
-    clientModel.find({_id:id}).then(data=>{
+    var {id}=req.params;
+    clientModel.findOne({_id:id}).then(data=>{
         res.status(200).json(data);
     })
 }

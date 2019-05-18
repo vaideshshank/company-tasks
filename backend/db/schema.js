@@ -17,7 +17,7 @@ var connect=()=>{
 var userModel=()=>{
     var schema=mongoose.Schema({
         name:{type:String,required:true,trim:true},
-        username:{type:String,required:true,trim:true,minlength:5},
+        username:{type:String,required:true,trim:true,minlength:5,unique:true},
         email:{type:String,required:true,
             validate:{validator:(value)=>{
                 return validator.isEmail(value)
@@ -74,4 +74,19 @@ var clientModel=()=>{
     return new mongoose.model('Clients',schema);
 }
 
-module.exports={connect,clientModel,userModel};
+var taskModel=()=>{
+    var schema=mongoose.Schema({
+        taskname:{type:String,required:true},
+        description:{type:String,required:true},
+        clients:[{
+            id:{type:mongoose.Schema.Types.ObjectId,required:true}
+        }],
+        _creator:{
+            type:mongoose.Schema.Types.ObjectId,required:true
+        }
+    })
+
+    return new mongoose.model('Tasks',schema);
+}
+
+module.exports={connect,clientModel,userModel,taskModel};
