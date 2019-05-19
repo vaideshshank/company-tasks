@@ -10,7 +10,7 @@
   "engines": {
     "node":"8.11.3"
   },
-  "proxy": "http://localhost:5000",
+  "proxy": "https://limitless-spire-38110.herokuapp.com:5000",
   "keywords": [],
   "author": "",
   "license": "ISC",
