@@ -1,5 +1,6 @@
 const express=require('express');
 const bodyParser=require('body-parser');
+const path=require('path');
 const app=express();
 const cors=require('cors');
 const {saveClient,saveUser,getClients,singleClient,
@@ -10,6 +11,11 @@ app.use(bodyParser.urlencoded({extended:false}));
 // Too important
 app.use(express.json());
 app.use(cors());
+app.use(express.static(path.join(__dirname, "frontend", "public")))
+app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "frontend", "public", "index.html"));
+});
+
 
 require('dotenv').config();
 const port=process.env.PORT;
