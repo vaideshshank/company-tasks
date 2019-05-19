@@ -133,5 +133,16 @@ var removeClientsFromTasks=(req,res)=>{
     })
 }
 
+var deleteTask=(req,res)=>{
+    var {task_id,user_id}=req.body;
+    user_id="5cdf185ef5cc7026484a3813";
+    taskModel.findOneAndDelete({_id:task_id,user:user_id}).then(()=>{
+        res.status(200).json({message:'Task removed from account'});
+    }).catch(err=>{
+        console.log(err);
+        res.status(400).json({message:'Task not removed from account. Server failure'});
+    })
+}
+
 module.exports={saveClient,saveUser,getClients,singleClient,saveTask,
-    listTasks,addClientToTask,getClientsWithTasks,removeClientsFromTasks};
+    listTasks,addClientToTask,getClientsWithTasks,removeClientsFromTasks,deleteTask};

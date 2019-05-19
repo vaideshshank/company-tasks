@@ -10,6 +10,7 @@ import axios from 'axios';
 
 export default class Tasks extends Component {
   state={
+      deleteAlert:false,
       show:false,
       taskname:"",
       description:"",
@@ -45,9 +46,20 @@ export default class Tasks extends Component {
         this.getTasks();
         alert(data.message);
       }).catch(({data})=>{
+        this.handleModel();
           console.log(data);
           alert(data);
       })
+  }
+
+  delete=(id)=>{
+    axios.post(process.env.REACT_APP_BACKEND+'/deleteTask',{task_id:id}).then((resp)=>{
+      alert(resp.data.message);
+      this.getTasks();
+    }).catch(err=>{
+      console.log(err);
+      alert(err.message);
+    })
   }
 
   handleModel=()=>{
@@ -61,7 +73,7 @@ export default class Tasks extends Component {
     var colors=['info','secondary','success','warning'],i=-1;
     return (
       <div className="text-left">
-        <Modal show={this.state.show} onHide={this.handleModal}>
+        <Modal show={this.state.show} onHide={this.handleModel}>
           <Modal.Header closeButton>
             <Modal.Title>New Task</Modal.Title>
           </Modal.Header>
@@ -88,16 +100,20 @@ export default class Tasks extends Component {
 
         <Jumbotron>
           <Button variant="success" onClick={this.handleModel}>+ Add Task</Button>
-        <h2>Existing Tasks</h2>
+        <h2 style={{marginTop:'30px',marginBottom:'30px'}}>Existing Tasks</h2>
         <div className="container">
             {
                 this.state.tasks.map(({_id,description,taskname,duration})=>{
                     i++;
                     return(
-                    <Alert variant={colors[i%(colors.length)]} key={_id} dismissible>
+                    <Alert variant={colors[i%(colors.length)]} key={_id}>
+                        <button type="button" class="close" onClick={()=>this.delete(_id)}>
+                          <span aria-hidden="true">&times;</span>
+                        </button>
                         <h3>{taskname}</h3>
                         <p>{description}</p>
                         <strong>Duration : </strong>{duration}
+                        
                     </Alert>)
                 })
             }
@@ -107,3 +123,22 @@ export default class Tasks extends Component {
     )
   }
 }
+
+// var DeleteTaskAlert=()=>{
+//   return(
+//   <Modal show={this.state.show} onHide={this.handleClose}>
+//     <Modal.Header closeButton>
+//       <Modal.Title>Modal heading</Modal.Title>
+//     </Modal.Header>
+//     <Modal.Body>Woohoo, you're reading this text in a modal!</Modal.Body>
+//     <Modal.Footer>
+//       <Button variant="secondary" onClick={this.handleClose}>
+//         Close
+//       </Button>
+//       <Button variant="primary" onClick={this.handleClose}>
+//         Save Changes
+//       </Button>
+//     </Modal.Footer>
+//   </Modal>
+//   )
+// }

@@ -3,7 +3,7 @@ const bodyParser=require('body-parser');
 const app=express();
 const cors=require('cors');
 const {saveClient,saveUser,getClients,singleClient,
-    saveTask,listTasks,addClientToTask,
+    saveTask,listTasks,addClientToTask,deleteTask,
     getClientsWithTasks,removeClientsFromTasks}=require('./db/model');
 
 app.use(bodyParser.urlencoded({extended:false}));
@@ -23,6 +23,7 @@ app.get('/api/listTasks',listTasks);
 app.post('/api/addClientToTask',addClientToTask);
 app.get('/api/clientsWithTasks/:id',getClientsWithTasks);
 app.post('/api/removeClientFromTask',removeClientsFromTasks);
+app.post('/api/deleteTask',deleteTask);
 
 app.listen(port,()=>{
     console.log("Inintialized");

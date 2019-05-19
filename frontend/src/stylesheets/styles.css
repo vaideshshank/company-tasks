@@ -6,3 +6,6 @@
     background-color: rgba(196, 225, 230, 0.527);
     color:rgba(108, 245, 188, 0.658);
 }
+.mr-auto a{
+    margin:10px;
+}
