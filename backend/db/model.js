@@ -1,4 +1,5 @@
 const mongoose=require('mongoose');
+var _=require('lodash');
 var {connect,clientModel,userModel,taskModel,taskModel}=require('./schema');
 connect();
 clientModel=clientModel();userModel=userModel();taskModel=taskModel();
@@ -82,10 +83,10 @@ var listTasks=(req,res)=>{
 }
 
 var addClientToTask=(req,res)=>{
-    var {user_id,client_id,task_id}=req.body;
+    var {user_id,client_id,task_id,duration}=req.body;
     user_id='5cdf185ef5cc7026484a3813';
-    console.log({user_id,client_id,task_id});
-    taskModel.update({user:user_id,_id:task_id},{$push:{clients:client_id}}).then((data)=>{
+    console.log({user_id,client_id,task_id,duration});
+    taskModel.update({user:user_id,_id:task_id},{$push:{clients:{id:client_id,duration}}}).then((data)=>{
         console.log(data);
         res.status(200).json({message:'Client Added to Task'});
     }).catch(err=>{
@@ -94,4 +95,43 @@ var addClientToTask=(req,res)=>{
     })
 }
 
-module.exports={saveClient,saveUser,getClients,singleClient,saveTask,listTasks,addClientToTask};
+var getClientsWithTasks=(req,res)=>{
+    var {id}=req.params,user='5cdf185ef5cc7026484a3813';
+    console.log("ID : "+id);
+    // taskModel.find({"clients.id":id,user},'_id clients').then((data)=>{
+    //    var newdata=_.map(data,(single)=>{
+    //        var duration,dat=_.find(single.clients,{id});
+    //        console.log(dat);
+    //        if(dat==undefined){
+    //         duration=null;
+    //         return {data,duration,clients:null};
+    //        }else{
+    //         duration=dat[0].duration;
+    //         return {data,duration,clients:null};
+    //        }
+    //    })
+    // res.status(200).json(newdata);
+    taskModel.find({"clients.id":id,user},'_id').then((data)=>{
+        res.status(200).json(data);
+    }).catch(err=>{
+        console.log(err);
+        res.status(400).json({message:'Server failure'});
+    })
+}
+
+var removeClientsFromTasks=(req,res)=>{
+    var {client_id,user_id,task_id}=req.body;
+    console.log(task_id,client_id);
+    user_id="5cdf185ef5cc7026484a3813";
+    taskModel.update({_id:task_id,user:user_id},{$pull:{
+        clients:{id:client_id}
+    }},{multi:true}).then(()=>{
+        res.status(200).json({message:"Client REMOVED from task"});
+    }).catch(err=>{
+        console.log(err);
+        res.status(400).json({message:"Client NOT removed. Server failure."});
+    })
+}
+
+module.exports={saveClient,saveUser,getClients,singleClient,saveTask,
+    listTasks,addClientToTask,getClientsWithTasks,removeClientsFromTasks};
