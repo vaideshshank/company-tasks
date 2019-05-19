@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "ndoe server.js",
-    "heroku-postbuild": "cd frontend && yarn install && yarn run"
+    "heroku-postbuild": "cd frontend && npm install --only=dev && npm install && npm run build"
   },
   "engines": {
     "node":"8.11.3"
