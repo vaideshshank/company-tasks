@@ -22,12 +22,14 @@ export default class SingleClient extends Component {
             var tasksVar=data.data.tasks;
             axios.get(process.env.REACT_APP_BACKEND+'/clientsWithTasks/'+params.id).then(data2=>{  
               tasksVar=_.map(tasksVar,(task,ind)=>{
-                var exists,{_id}=task;
-                (_.find(data2.data,{_id})) ? exists=false:exists=true;
-                //console.log({exists});
-                return {...task,exists};
+                var exists,{_id}=task,duration,check=(_.find(data2.data,{_id}));
+                console.log(check);
+                if(!check){
+                  exists=true;duration=null;
+                }else{exists=false;duration=check.clients[0].duration}
+
+                return {...task,exists,duration};
               });
-              //console.log(tasksVar);
               this.setState({
                 ...this.state,
                 tasks:tasksVar
@@ -107,7 +109,7 @@ export default class SingleClient extends Component {
         <h2>Available Tasks</h2>
         <div style={{display:'flex',flexWrap:'wrap'}}>
       {
-        this.state.tasks.map(({date_created,_id,taskname,description,exists})=>{
+        this.state.tasks.map(({date_created,_id,taskname,description,exists,duration})=>{
           return(
           <Card style={{ width:'60vw',margin:"0 auto"}}>
           <Card.Body style={{textAlign:'left',width:'50vw'}}>
@@ -115,7 +117,14 @@ export default class SingleClient extends Component {
               <Card.Text>
                 <div>{description}</div>
                 <div><strong>Date created : </strong>{date_created.split('T')[0]}</div>
-                <div><strong>Deadline : </strong>{}</div>
+                {
+                 (()=>{
+                    if(!exists){
+                      return <div><strong>Deadline : </strong>{duration}</div>
+                    }
+                  })()
+                }
+                
               </Card.Text>
           </Card.Body>
           <div style={{margin:'20px',textAlign:"left"}} hidden={exists}>
@@ -123,7 +132,7 @@ export default class SingleClient extends Component {
           </div>
 
           <div class="form-row align-items-center" style={{margin:'20px',textAlign:'left'}} hidden={!exists}>
-            <h6>Deadline : </h6>
+            <h6>Set Deadline : </h6>
             <div class="col-auto my-1" style={{display:'flex'}}>
               <select class="custom-select mr-sm-2" id="inlineFormCustomSelect" style={{maxWidth:'200px'}} id="number" onChange={this.updateDuration}>
                 <option value="0" selected>Choose number...</option>
