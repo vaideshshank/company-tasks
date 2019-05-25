@@ -6,17 +6,25 @@ import axios from 'axios';
 import Button from 'react-bootstrap/Button';
 
 export default class ClientForm extends Component {
-
+    constructor(props){
+        super(props);
+    }
+    state={
+        imgPath:"/../../images/placeholder.jpg",
+        backendImgPath:null
+    }
     submit=()=>{
         var name=document.getElementsByClassName('name')[0].value,
             email=document.getElementsByClassName('email')[0].value,
             phone=document.getElementsByClassName('mobile')[0].value,
             address=document.getElementsByClassName('address')[0].value,
             profession=document.getElementsByClassName('profession')[0].value,
-            image="jcrkere";
+            image=this.state.backendImgPath;
+            console.log(image)
         console.log({name,email,phone,address,profession})
         axios.post(process.env.REACT_APP_BACKEND+'/clientForm',
-                {name,email,phone,profession,image,address}
+                {name,email,phone,profession,image,address},
+                {headers:{"x-auth":this.props.token}}
             ).then(({data})=>{
             console.log(JSON.stringify(data,null,2));
             alert(data.message);    
@@ -24,6 +32,24 @@ export default class ClientForm extends Component {
             console.log(err);
             alert(err.message)
         })
+    }
+    imageUpload=(e)=>{
+        e.preventDefault();
+        var fd=new FormData();
+        var imgUrl=document.getElementById("imageUpload").files[0];
+        fd.append('photo',imgUrl);
+        axios.post(process.env.REACT_APP_BACKEND+'/upload',fd,{headers:{'content-type': 'multipart/form-data',}})
+        .then(({data})=>{
+            alert(data.message);
+            console.log(data.path);
+            this.setState({...this.state,backendImgPath:data.path})
+        }).catch((err)=>{alert("Please provide image with JPEG or PNG format")})
+    }
+    
+    preview=(e)=>{
+        var imgPath=window.URL.createObjectURL(e.target.files[0]);
+        console.log(imgPath);
+        this.setState({...this.state,imgPath})
     }
 
   render() {
@@ -33,6 +59,14 @@ export default class ClientForm extends Component {
         <Container>
             <h1>Client information form</h1>
             <Form className="text-left">
+                <Form.Group>
+                    <Form.Label>Client Image</Form.Label> <br/>
+                    <img src={this.state.imgPath} alt="Placeholder" style={{width:"85px",height:"100px"}}/>
+                    <form onSubmit={this.imageUpload} enctype="multipart/form-data" >
+                        <input type="file" accept="image/*" name="photo" id="imageUpload" onChange={this.preview}/><br/>
+                        <input type="submit" value="Upload Image" class="btn-sm btn-primary"/><br/>
+                    </form>
+                </Form.Group>
                 <Form.Group controlId="formBasicName">
                     <Form.Label>Name</Form.Label>
                     <Form.Control type="text" placeholder="Full Name" className="w-50 p-3 name"/>
@@ -59,6 +93,7 @@ export default class ClientForm extends Component {
                     <Form.Label>Profession</Form.Label>
                     <Form.Control type="text" placeholder="ex. Businessman/Freelancer/... " className="w-50 p-3 profession"/>
                 </Form.Group>
+                
                 <Button variant="primary" onClick={this.submit}>Submit</Button>
             </Form>
         </Container>

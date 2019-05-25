@@ -5,11 +5,14 @@ import '../stylesheets/styles.css';
 import axios from 'axios';
 
 export default class ClientsList extends Component {
+    constructor(props){
+        super(props);
+    }
     state={
         clients:[]
     }
     clientList(){
-        axios.get(process.env.REACT_APP_BACKEND+'/clients').then(data=>{
+        axios.get(process.env.REACT_APP_BACKEND+'/clients',{headers:{"x-auth":this.props.token}}).then(data=>{
             this.setState({...this.state,clients:data.data});
         })
     }

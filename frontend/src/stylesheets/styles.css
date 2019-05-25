@@ -9,3 +9,29 @@
 .mr-auto a{
     margin:10px;
 }
+
+.inup{
+    padding-top: 20px;
+    padding-bottom:20px;
+}
+
+.signupForm input{
+    width:400px;
+}
+.signupForm{
+    width:50vw;
+    text-align:left;
+    margin:0 auto;
+    box-shadow: 0 0 5px gray;
+    border-radius: 10px;
+    padding:20px;
+}
+
+.switch>span{
+    color:rgba(0, 162, 255, 0.986);
+}
+
+.switch>span:hover{
+    text-decoration: underline;
+    cursor: pointer
+}

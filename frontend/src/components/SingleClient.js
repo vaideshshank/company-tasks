@@ -6,6 +6,9 @@ import axios from 'axios';
 import _ from 'lodash';
 
 export default class SingleClient extends Component {
+  constructor(props){
+    super(props);
+  }
   state={
       client:{},
       tasks:[],
@@ -13,14 +16,17 @@ export default class SingleClient extends Component {
     }
 
   loadContent=()=>{
-    var { match: { params } } = this.props;
-      axios.get(process.env.REACT_APP_BACKEND+'/singleClient/'+params.id).then(data=>{
+    console.log();
+    var id = window.location.pathname.split('/')[2];
+      axios.get(process.env.REACT_APP_BACKEND+'/singleClient/'+id,
+               {headers:{"x-auth":this.props.token}}).then(data=>{
           this.setState({
             ...this.state,
             client:data.data.clientData
           },()=>{
             var tasksVar=data.data.tasks;
-            axios.get(process.env.REACT_APP_BACKEND+'/clientsWithTasks/'+params.id).then(data2=>{  
+            axios.get(process.env.REACT_APP_BACKEND+'/clientsWithTasks/'+id,
+            {headers:{"x-auth":this.props.token}}).then(data2=>{  
               tasksVar=_.map(tasksVar,(task,ind)=>{
                 var exists,{_id}=task,duration,check=(_.find(data2.data,{_id}));
                 console.log(check);
@@ -62,7 +68,7 @@ export default class SingleClient extends Component {
           task_id:id,
           user_id:this.state.client.user,
           duration
-    }).then(()=>{
+    },{headers:{"x-auth":this.props.token}}).then(()=>{
       console.log('Task assigned');
       alert('Task assigned to client');
       this.setState({
@@ -80,7 +86,8 @@ export default class SingleClient extends Component {
   removeClient(id){
     console.log("REMOVE: "+id,this.state.client._id);
     axios.post(process.env.REACT_APP_BACKEND+'/removeClientFromTask',
-    {task_id:id,client_id:this.state.client._id}).then((resp)=>{
+    {task_id:id,client_id:this.state.client._id},
+    {headers:{"x-auth":this.props.token}}).then((resp)=>{
       alert(resp.data.message);
       this.loadContent();
     }).catch(err=>{
@@ -102,7 +109,7 @@ export default class SingleClient extends Component {
               <h5><strong>Address : </strong>{this.state.client.address}</h5>
             </Card.Text>
         </Card.Body>
-        <Card.Img src="../images/placeholder.jpg" />
+        <Card.Img src={`${process.env.REACT_APP_BACKEND}/../${this.state.client.image}`} style={{height:'150px', width:'150px'}}/>
         </Card>
       }
       <Jumbotron style={{width:'90vw', margin:'0 auto'}}>

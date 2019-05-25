@@ -9,6 +9,9 @@ import Modal from 'react-bootstrap/Modal';
 import axios from 'axios';
 
 export default class Tasks extends Component {
+  constructor(props){
+    super(props);
+  }
   state={
       deleteAlert:false,
       show:false,
@@ -17,7 +20,8 @@ export default class Tasks extends Component {
       duration:"1 week",tasks:[]
   }
   getTasks=()=>{
-    axios.get(process.env.REACT_APP_BACKEND+'/listTasks').then(({data})=>{
+    axios.get(process.env.REACT_APP_BACKEND+'/listTasks',
+          {headers:{"x-auth":this.props.token}}).then(({data})=>{
         this.setState({...this.state,tasks:data.tasks});
     }).catch(err=>{
         console.log(err);
@@ -38,7 +42,8 @@ export default class Tasks extends Component {
 
   submit=()=>{
       var {taskname,description,duration}=this.state;
-      axios.post(process.env.REACT_APP_BACKEND+'/tasks',{taskname,description,duration}).then(({data})=>{
+      axios.post(process.env.REACT_APP_BACKEND+'/tasks',{taskname,description,duration},
+      {headers:{"x-auth":this.props.token}}).then(({data})=>{
         this.setState({
             ...this.state,taskname:"",description:""
         })
@@ -53,7 +58,8 @@ export default class Tasks extends Component {
   }
 
   delete=(id)=>{
-    axios.post(process.env.REACT_APP_BACKEND+'/deleteTask',{task_id:id}).then((resp)=>{
+    axios.post(process.env.REACT_APP_BACKEND+'/deleteTask',{task_id:id},
+    {headers:{"x-auth":this.props.token}}).then((resp)=>{
       alert(resp.data.message);
       this.getTasks();
     }).catch(err=>{
