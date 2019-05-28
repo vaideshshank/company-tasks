@@ -1,5 +1,16 @@
+@font-face{
+    font-family: 'Poppins-Light';
+    src:url(../fonts/Poppins-Light.otf);
+}
+
+
 .tasks{
-    background: rgba(201, 199, 199, 0.301)
+    background: rgba(114, 35, 35, 0.301)
+}
+
+body{
+    background: linear-gradient(to right, rgba(130, 153, 255, 0.541),rgba(255, 254, 254, 0.767));
+    font-family: Poppins-Light;
 }
 
 .clientCard:hover{
@@ -13,18 +24,20 @@
 .inup{
     padding-top: 20px;
     padding-bottom:20px;
+    margin:0 auto;
+    width:45vw
 }
 
 .signupForm input{
     width:400px;
 }
 .signupForm{
-    width:50vw;
     text-align:left;
     margin:0 auto;
     box-shadow: 0 0 5px gray;
     border-radius: 10px;
     padding:20px;
+    background: white;
 }
 
 .switch>span{
@@ -34,4 +47,43 @@
 .switch>span:hover{
     text-decoration: underline;
     cursor: pointer
+}
+
+.links{
+    color: white;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    display: block;
+    width: 18.5vw;
+    transition:color 0.2s ease,background 0.2s ease;
+}
+
+.links:hover{
+    text-decoration: none;
+    color:black;
+    background: rgba(255, 255, 255, 0.63)0;
+}
+
+.clientInfo{
+    width:75vw;
+    display:flex;
+    margin:0 auto;
+}
+
+
+#loginSpinner,#singleclientSpinner,
+#clientTaskAssSpinner{
+    width:60px;
+}
+
+#tasksSpinner,#clientsSpinner,
+#clientInfoSpinner,#clientTasksSpinner{
+    display: block;
+    margin:0 auto;
+    width:100px;
+}
+
+#clientTasksSpinner{
+    height:100px;
+    display: block;
 }

@@ -6,26 +6,39 @@ import FormControl from 'react-bootstrap/FormControl';
 import Button from 'react-bootstrap/Button';
 import Alert from 'react-bootstrap/Alert';
 import Modal from 'react-bootstrap/Modal';
+import Spinner from '../images/spinner.gif';
 import axios from 'axios';
 
 export default class Tasks extends Component {
   constructor(props){
     super(props);
+    if(props.token==""){
+      window.location.pathname="";
+    }
   }
   state={
       deleteAlert:false,
       show:false,
       taskname:"",
       description:"",
-      duration:"1 week",tasks:[]
+      duration:"1 week",tasks:[],
+      spinner:true,
+      noTask:false
   }
   getTasks=()=>{
+    this.setState({...this.state,spinner:false});
+    //console.log(this.props.token)
     axios.get(process.env.REACT_APP_BACKEND+'/listTasks',
-          {headers:{"x-auth":this.props.token}}).then(({data})=>{
-        this.setState({...this.state,tasks:data.tasks});
+        {headers:{"x-auth":this.props.token}}).then(({data})=>{
+        this.setState({...this.state,
+          tasks:data.tasks,
+          spinner:true,
+          noTask:data.tasks.length==0});
     }).catch(err=>{
+        this.setState({...this.state,spinner:true});
         console.log(err);
-        alert(err.data.message);
+        alert("Please signin or signup to continue");
+        window.location.pathname='/';
     });
   }
 
@@ -78,7 +91,7 @@ export default class Tasks extends Component {
   render() {
     var colors=['info','secondary','success','warning'],i=-1;
     return (
-      <div className="text-left">
+      <div className="text-left" style={{width:'80vw',transform:'translateX(20vw)'}} >
         <Modal show={this.state.show} onHide={this.handleModel}>
           <Modal.Header closeButton>
             <Modal.Title>New Task</Modal.Title>
@@ -104,15 +117,17 @@ export default class Tasks extends Component {
         </Modal>
 
 
-        <Jumbotron>
+        <Jumbotron style={{background:'transparent'}}>
           <Button variant="success" onClick={this.handleModel}>+ Add Task</Button>
         <h2 style={{marginTop:'30px',marginBottom:'30px'}}>Existing Tasks</h2>
+        <h4 hidden={!this.state.noTask}>No Tasks added yet</h4>
         <div className="container">
+            <img src={Spinner} hidden={this.state.spinner} id="tasksSpinner"/>
             {
                 this.state.tasks.map(({_id,description,taskname,duration})=>{
                     i++;
                     return(
-                    <Alert variant={colors[i%(colors.length)]} key={_id}>
+                    <Alert variant={colors[i%(colors.length)]} style={{boxShadow:"0 2px 5px gray"}} key={_id}>
                         <button type="button" class="close" onClick={()=>this.delete(_id)}>
                           <span aria-hidden="true">&times;</span>
                         </button>

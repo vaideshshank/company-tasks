@@ -4,47 +4,59 @@ import Button from 'react-bootstrap/Button';
 import Jumbotron from 'react-bootstrap/Jumbotron';
 import axios from 'axios';
 import _ from 'lodash';
+import Spinner from '../images/spinner.gif';
+import '../stylesheets/styles.css'
 
 export default class SingleClient extends Component {
   constructor(props){
     super(props);
+    if(props.token==""){
+      window.location.pathname="";
+  }
   }
   state={
       client:{},
       tasks:[],
-      duration:{}
+      duration:{},
+      spinner1:false,
+      spinner2:false,
+      noTask:false
     }
 
   loadContent=()=>{
-    console.log();
     var id = window.location.pathname.split('/')[2];
+      this.setState({...this.state,spinner1:true,spinner2:true})
       axios.get(process.env.REACT_APP_BACKEND+'/singleClient/'+id,
                {headers:{"x-auth":this.props.token}}).then(data=>{
           this.setState({
             ...this.state,
+            spinner1:false,
             client:data.data.clientData
           },()=>{
             var tasksVar=data.data.tasks;
-            axios.get(process.env.REACT_APP_BACKEND+'/clientsWithTasks/'+id,
+            return axios.get(process.env.REACT_APP_BACKEND+'/clientsWithTasks/'+id,
             {headers:{"x-auth":this.props.token}}).then(data2=>{  
               tasksVar=_.map(tasksVar,(task,ind)=>{
-                var exists,{_id}=task,duration,check=(_.find(data2.data,{_id}));
+                var exists,{_id}=task,duration,check=(_.find(data2.data,{_id})),spinner3=false;
                 console.log(check);
                 if(!check){
                   exists=true;duration=null;
                 }else{exists=false;duration=check.clients[0].duration}
-
-                return {...task,exists,duration};
+                return {...task,exists,duration,spinner3};
               });
               this.setState({
                 ...this.state,
-                tasks:tasksVar
-              },()=>{
-                //console.log(this.state.tasks);
+                spinner2:false,
+                tasks:tasksVar,
+                noTask:data.data.tasks.length==0
               })
             })
           })
-    })
+    }).catch(err=>{
+      console.log(err);
+      alert("Please signin or signup to continue");
+      window.location.pathname='/';
+  });
   }
   componentDidMount(){
      this.loadContent();
@@ -60,9 +72,11 @@ export default class SingleClient extends Component {
     })
   }
 
-  assignTask=(id)=>{
+  assignTask=(id,index)=>{
     var duration=this.state.duration.number+" "+this.state.duration.timeline;
     //console.log(duration);
+    this.setState({[this.state.tasks[index]]:{spinner3:true}});
+    console.log("crecre"+this.state.tasks[index].spinner3);
     axios.post(process.env.REACT_APP_BACKEND+'/addClientToTask',{
           client_id:this.state.client._id,
           task_id:id,
@@ -75,32 +89,44 @@ export default class SingleClient extends Component {
         ...this.state,
         duration:{}
       },()=>{
+        this.setState({[this.state.tasks[index]]:{spinner3:false}});
+        console.log(this.state.tasks[index].spinner3);
         this.loadContent();
       })
     }).catch(err=>{
       console.log(err);
+      this.setState({[this.state.tasks[index]]:{spinner3:false}});
+      console.log(this.state.tasks[index].spinner3);
       alert('Task not assigned. Server failure');
     })
   }
 
-  removeClient(id){
+  removeClient(id,index){
     console.log("REMOVE: "+id,this.state.client._id);
+    this.setState({[this.state.tasks[index]]:{spinner3:true}});
+    console.log(this.state.tasks[index].spinner3);
     axios.post(process.env.REACT_APP_BACKEND+'/removeClientFromTask',
     {task_id:id,client_id:this.state.client._id},
     {headers:{"x-auth":this.props.token}}).then((resp)=>{
+      this.setState({...this.state});
+      this.setState({[this.state.tasks[index]]:{spinner3:false}});
+      console.log(this.state.tasks[index].spinner3);
       alert(resp.data.message);
       this.loadContent();
     }).catch(err=>{
+      this.setState({[this.state.tasks[index]]:{spinner3:false}});
+      console.log(this.state.tasks[index].spinner3);
       alert("Error Occurred");
     })
   }
 
   render() {
     return (
-      <div style={{backgroundColor:'rgba(108, 245, 188, 0.4)',padding:'20px'}}>
+      <div style={{padding:"10px",width: "77vw", transform: "translateX(21vw)"}} >
       {
-        <Card style={{ width:'90vw',display:'flex',margin:"0 auto"}}>
-        <Card.Body style={{textAlign:'left'}}>
+        <Card className="clientInfo">
+        <img src={Spinner} id="clientInfoSpinner" hidden={!this.state.spinner1}/>
+        <Card.Body style={{textAlign:'left'}} hidden={this.state.spinner1}>
             <Card.Title style={{fontSize:'40px'}}>{this.state.client.name}</Card.Title>
             <Card.Text>
               <h5><strong>Profession : </strong>{this.state.client.profession}</h5>
@@ -109,14 +135,19 @@ export default class SingleClient extends Component {
               <h5><strong>Address : </strong>{this.state.client.address}</h5>
             </Card.Text>
         </Card.Body>
-        <Card.Img src={`${process.env.REACT_APP_BACKEND}/../${this.state.client.image}`} style={{height:'150px', width:'150px'}}/>
+        <Card.Img src={`${process.env.REACT_APP_BACKEND}/../${this.state.client.image}`}
+         hidden={this.state.spinner1} style={{height:'150px', width:'150px'}}/>
         </Card>
       }
-      <Jumbotron style={{width:'90vw', margin:'0 auto'}}>
+      <Jumbotron style={{width:'75vw', margin:'0 auto', backgroundColor:'transparent'}}>
         <h2>Available Tasks</h2>
+        <img src={Spinner} id="clientTasksSpinner" hidden={!this.state.spinner2}/><br/>
+        <h4 hidden={!this.state.noTask}>No Tasks added yet</h4>
         <div style={{display:'flex',flexWrap:'wrap'}}>
+          
+        
       {
-        this.state.tasks.map(({date_created,_id,taskname,description,exists,duration})=>{
+        this.state.tasks.map(({date_created,_id,taskname,description,exists,duration},index)=>{
           return(
           <Card style={{ width:'60vw',margin:"0 auto"}}>
           <Card.Body style={{textAlign:'left',width:'50vw'}}>
@@ -135,21 +166,21 @@ export default class SingleClient extends Component {
               </Card.Text>
           </Card.Body>
           <div style={{margin:'20px',textAlign:"left"}} hidden={exists}>
-          <Button variant="danger" style={{maxWidth:'120px'}} onClick={()=>this.removeClient(_id)}>Dismiss Task</Button>
+          <Button variant="danger" style={{maxWidth:'140px'}} onClick={()=>this.removeClient(_id,index)}>Dismiss Task</Button>
           </div>
 
-          <div class="form-row align-items-center" style={{margin:'20px',textAlign:'left'}} hidden={!exists}>
+          <div className="form-row align-items-center" style={{margin:'20px',textAlign:'left'}} hidden={!exists}>
             <h6>Set Deadline : </h6>
-            <div class="col-auto my-1" style={{display:'flex'}}>
-              <select class="custom-select mr-sm-2" id="inlineFormCustomSelect" style={{maxWidth:'200px'}} id="number" onChange={this.updateDuration}>
+            <div className="col-auto my-1" style={{display:'flex'}}>
+              <select className="custom-select mr-sm-2" id="inlineFormCustomSelect" style={{maxWidth:'200px'}} id="number" onChange={this.updateDuration}>
                 <option value="0" selected>Choose number...</option>
                 {
-                  [...Array(20).keys()].map((val)=>{
-                    return <option value={val+1}>{val+1}</option>
+                  [...Array(20).keys()].map((val,ind)=>{
+                    return <option value={val+1} key={ind}>{val+1}</option>
                   })
                 }
               </select>
-              <select class="custom-select mr-sm-2" id="inlineFormCustomSelect" style={{maxWidth:'200px'}} id="timeline" onChange={this.updateDuration}>
+              <select className="custom-select mr-sm-2" id="inlineFormCustomSelect" style={{maxWidth:'200px'}} id="timeline" onChange={this.updateDuration}>
                 <option value="none" selected>Choose timeframe...</option>
                 <option value="Hours">Hours</option>
                 <option value="Days">Days</option>
@@ -157,7 +188,8 @@ export default class SingleClient extends Component {
                 <option value="Months">Months</option>                
               </select>
             </div>
-            <Button variant="primary" style={{maxWidth:'120px',display:'block'}} onClick={()=>this.assignTask(_id)}>Assign Task</Button>
+            <Button variant="primary" style={{maxWidth:'120px',display:'block'}} onClick={()=>this.assignTask(_id,index)}>Assign Task</Button>
+            <img src={Spinner} id="clientTaskAssSpinner" hidden={!this.state.tasks[index].spinner3}/>
           </div>
           </Card>)
         })

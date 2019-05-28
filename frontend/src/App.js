@@ -10,11 +10,12 @@ import Logins from './components/Logins';
 
 
 export default class App extends Component{
-  state={token:""}
+  state={token:"",name:""}
   componentWillMount(){
     this.setState({
       ...this.state,
-      token:localStorage.getItem('token')
+      token:localStorage.getItem('token'),
+      name:localStorage.getItem('name')
     })  
     console.log(this.state.token);
   }
@@ -22,24 +23,28 @@ export default class App extends Component{
   refreshState=()=>{
     this.setState({
       ...this.state,
-      token:localStorage.getItem('token')
+      token:localStorage.getItem('token'),
+      token:localStorage.getItem('name')
     })
   }
-  setToken=(newToken)=>{
+  setToken=(newToken,name)=>{
     localStorage.setItem("token",newToken);
+    localStorage.setItem('name',name)
     this.refreshState();
   }
-
   removeToken=()=>{
     console.log("removed");
     localStorage.setItem("token","");
+    localStorage.setItem("name","");
     this.refreshState();  
   }
+  
   render(){
+    console.log(window.location.pathname=='/');
     return (
       <BrowserRouter>
-        <div className="App">
-          <Navigation removeToken={this.removeToken} token={this.state.token}/>
+        <div className="App" style={{display:'flex',flexDirection:'row'}}>
+          <Navigation removeToken={this.removeToken} token={this.state.token} name={this.state.name}/>
           <Route path="/clientForm" render={() => <ClientForm token={this.state.token} />}/>
           <Route path="/tasks" render={() => <Tasks token={this.state.token} />}/>
           <Route path="/clientList" render={() => <ClientsList token={this.state.token} />}/>
